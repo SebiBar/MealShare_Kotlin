@@ -25,8 +25,8 @@ class AuthRepository @Inject constructor(
 
             if (response.isSuccessful) {
                 response.body()?.let { authResponse ->
-                    // Save the token
-                    apiClient.setAuthToken(authResponse.token)
+                    // Save both token and user data
+                    apiClient.setAuthData(authResponse)
                     emit(Result.success(authResponse))
                 } ?: emit(Result.failure(Exception("Empty response body")))
             } else {
@@ -37,15 +37,15 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun register(username: String, password: String): Flow<Result<UserAuthResponse>> = flow {
+    suspend fun register(email: String, username: String, password: String): Flow<Result<UserAuthResponse>> = flow {
         try {
-            val userRegister = UserRegister(username, password)
+            val userRegister = UserRegister(email, username, password)
             val response = apiService.registerUser(userRegister)
 
             if (response.isSuccessful) {
                 response.body()?.let { authResponse ->
-                    // Save the token
-                    apiClient.setAuthToken(authResponse.token)
+                    // Save both token and user data
+                    apiClient.setAuthData(authResponse)
                     emit(Result.success(authResponse))
                 } ?: emit(Result.failure(Exception("Empty response body")))
             } else {

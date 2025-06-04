@@ -16,26 +16,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.mealshare_kotlin.viewModel.LoginUiState
-import com.example.mealshare_kotlin.viewModel.LoginViewModel
+import com.example.mealshare_kotlin.viewModel.RegisterUiState
+import com.example.mealshare_kotlin.viewModel.RegisterViewModel
 
 @Composable
-fun LoginScreen(
-    onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
+fun RegisterScreen(
+    onRegisterSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    viewModel: RegisterViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val email by viewModel.email.collectAsStateWithLifecycle()
     val username by viewModel.username.collectAsStateWithLifecycle()
     val password by viewModel.password.collectAsStateWithLifecycle()
+    val confirmPassword by viewModel.confirmPassword.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
 
     // Handle UI state changes
     LaunchedEffect(uiState) {
         when (uiState) {
-            is LoginUiState.Success -> {
-                // Navigate to main screen on successful login
-                onLoginSuccess()
+            is RegisterUiState.Success -> {
+                // Navigate to main screen on successful registration
+                onRegisterSuccess()
             }
             else -> {}
         }
@@ -60,9 +62,25 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Login",
+                    text = "Register",
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
+                )
+
+                // Email field
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { viewModel.onEmailChange(it) },
+                    label = { Text("Email") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    )
                 )
 
                 // Username field
@@ -90,49 +108,68 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
+                // Confirm Password field
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { viewModel.onConfirmPasswordChange(it) },
+                    label = { Text("Confirm Password") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             focusManager.clearFocus()
-                            viewModel.login()
+                            viewModel.register()
                         }
                     ),
                     visualTransformation = PasswordVisualTransformation()
                 )
 
                 // Error message
-                if (uiState is LoginUiState.Error) {
+                if (uiState is RegisterUiState.Error) {
                     Text(
-                        text = (uiState as LoginUiState.Error).message,
+                        text = (uiState as RegisterUiState.Error).message,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
 
-                // Login button
+                // Register button
                 Button(
-                    onClick = { viewModel.login() },
+                    onClick = { viewModel.register() },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = username.isNotBlank() && password.isNotBlank() && uiState !is LoginUiState.Loading
+                    enabled = email.isNotBlank() && username.isNotBlank() &&
+                            password.isNotBlank() && confirmPassword.isNotBlank() &&
+                            uiState !is RegisterUiState.Loading
                 ) {
-                    if (uiState is LoginUiState.Loading) {
+                    if (uiState is RegisterUiState.Loading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Login")
+                        Text("Register")
                     }
                 }
 
-                // Register link
+                // Login link
                 TextButton(
-                    onClick = onNavigateToRegister,
+                    onClick = onNavigateToLogin,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Don't have an account? Register now!")
+                    Text("Already have an account? Login")
                 }
             }
         }

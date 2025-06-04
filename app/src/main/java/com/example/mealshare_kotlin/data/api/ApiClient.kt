@@ -2,6 +2,8 @@ package com.example.mealshare_kotlin.data.api
 
 import android.content.Context
 import com.example.mealshare_kotlin.data.auth.TokenManager
+import com.example.mealshare_kotlin.model.User
+import com.example.mealshare_kotlin.model.UserAuthResponse
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -37,30 +39,42 @@ class ApiClient @Inject constructor(
 
     // Token storage and management
     private var authToken: String? = null
+    private var currentUser: User? = null
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         // Load token from DataStore synchronously to ensure it's available
         runBlocking {
             authToken = tokenManager.getToken().first()
+            currentUser = tokenManager.getUser().first()
         }
     }
 
     /**
-     * Set auth token and save it to DataStore
+     * Set auth data (token and user) and save it to DataStore
      */
-    fun setAuthToken(token: String) {
-        authToken = token
+    fun setAuthData(authResponse: UserAuthResponse) {
+        authToken = authResponse.token
+        currentUser = authResponse.user
         coroutineScope.launch {
-            tokenManager.saveToken(token)
+            tokenManager.saveToken(authResponse.token)
+            tokenManager.saveUser(authResponse.user)
         }
     }
 
     /**
-     * Clear auth token from memory and DataStore
+     * Get current user data
+     */
+    fun getCurrentUser(): User? {
+        return currentUser
+    }
+
+    /**
+     * Clear auth token and user data from memory and DataStore
      */
     fun clearAuthToken() {
         authToken = null
+        currentUser = null
         coroutineScope.launch {
             tokenManager.clearToken()
         }

@@ -10,14 +10,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.mealshare_kotlin.ui.screens.HomeScreen
 import com.example.mealshare_kotlin.ui.screens.LoginScreen
+import com.example.mealshare_kotlin.ui.screens.RegisterScreen
 import com.example.mealshare_kotlin.viewModel.AuthViewModel
-import kotlinx.coroutines.flow.map
 
 /**
  * Navigation destinations used in the app
  */
 sealed class Screen(val route: String) {
     object Login : Screen("login")
+    object Register : Screen("register")
     object Home : Screen("home")
 }
 
@@ -44,6 +45,25 @@ fun AppNavigation(
                 onLoginSuccess = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route)
+                }
+            )
+        }
+
+        // Register screen
+        composable(Screen.Register.route) {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
                     }
                 }
             )
