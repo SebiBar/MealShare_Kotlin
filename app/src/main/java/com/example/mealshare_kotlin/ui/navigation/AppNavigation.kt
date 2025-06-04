@@ -6,11 +6,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.mealshare_kotlin.ui.screens.HomeScreen
 import com.example.mealshare_kotlin.ui.screens.LoginScreen
+import com.example.mealshare_kotlin.ui.screens.RecipeDetailsScreen
 import com.example.mealshare_kotlin.ui.screens.RegisterScreen
+import com.example.mealshare_kotlin.ui.screens.SettingsScreen
 import com.example.mealshare_kotlin.viewModel.AuthViewModel
 
 /**
@@ -20,6 +24,10 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
     object Home : Screen("home")
+    object Settings : Screen("settings")
+    object RecipeDetails : Screen("recipe_details/{recipeId}") {
+        fun createRoute(recipeId: String) = "recipe_details/$recipeId"
+    }
 }
 
 /**
@@ -71,14 +79,26 @@ fun AppNavigation(
 
         // Home screen
         composable(Screen.Home.route) {
-            HomeScreen(
-                onLogout = {
-                    authViewModel.logout()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
-                }
-            )
+            HomeScreen(navController = navController)
+        }
+
+        //Settings screen
+        composable(Screen.Settings.route){
+            SettingsScreen(navController = navController)
+        }
+
+        // Recipe details screen
+        composable(
+            route = Screen.RecipeDetails.route,
+            arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId")?.toLongOrNull()
+            if (recipeId != null) {
+                RecipeDetailsScreen(
+                    recipeId = recipeId,
+                    navController = navController
+                )
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.example.mealshare_kotlin.model
 
 data class User(
-    val id: Int,
+    val id: Long,
     val username: String
 )
