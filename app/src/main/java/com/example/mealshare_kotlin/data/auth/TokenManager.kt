@@ -74,6 +74,15 @@ class TokenManager @Inject constructor(
     }
 
     /**
+     * Get user ID as a Flow
+     */
+    fun getUserId(): Flow<Long?> {
+        return getUser().map { user ->
+            user?.id
+        }
+    }
+
+    /**
      * Clear JWT token and user data from DataStore
      */
     suspend fun clearToken() {

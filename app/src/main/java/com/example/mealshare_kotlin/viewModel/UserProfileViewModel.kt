@@ -35,8 +35,7 @@ class UserProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // For now we'll use a dummy approach because we don't have a direct API call
-                // In a real implementation, there would be an API call to get user details
+                //dummy data
                 _userProfile.value = User(id = userId, username = "User $userId")
                 _error.value = null
             } catch (e: Exception) {
@@ -56,7 +55,14 @@ class UserProfileViewModel @Inject constructor(
             try {
                 val response = apiService.getRecipesByUserId(userId.toInt())
                 if (response.isSuccessful) {
-                    _userRecipes.value = response.body() ?: emptyList()
+                    val recipes = response.body() ?: emptyList()
+                    _userRecipes.value = recipes
+
+                    // Update user profile with real data from the first recipe if available
+                    if (recipes.isNotEmpty()) {
+                        _userProfile.value = recipes[0].user
+                    }
+
                     _error.value = null
                 } else {
                     _error.value = "Failed to load recipes: ${response.message()}"

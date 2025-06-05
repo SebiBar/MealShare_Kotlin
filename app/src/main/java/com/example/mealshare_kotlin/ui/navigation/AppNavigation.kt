@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.mealshare_kotlin.ui.screens.CreateRecipeScreen
 import com.example.mealshare_kotlin.ui.screens.HomeScreen
 import com.example.mealshare_kotlin.ui.screens.LoginScreen
 import com.example.mealshare_kotlin.ui.screens.RecipeDetailsScreen
@@ -34,6 +35,7 @@ sealed class Screen(val route: String) {
     object UserProfile : Screen("user_profile/{userId}") {
         fun createRoute(userId: String) = "user_profile/$userId"
     }
+    object CreateRecipe : Screen("create_recipe")
 }
 
 /**
@@ -115,9 +117,7 @@ fun AppNavigation(
                     navController = navController
                 )
             }
-        }
-
-        // User profile screen
+        }        // User profile screen
         composable(
             route = Screen.UserProfile.route,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
@@ -129,6 +129,13 @@ fun AppNavigation(
                     navController = navController
                 )
             }
+        }
+        
+        // Create recipe screen
+        composable(Screen.CreateRecipe.route) {
+            CreateRecipeScreen(
+                navController = navController
+            )
         }
     }
 }
