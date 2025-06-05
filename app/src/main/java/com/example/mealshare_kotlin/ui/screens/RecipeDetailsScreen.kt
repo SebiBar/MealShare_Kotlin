@@ -128,6 +128,7 @@ fun RecipeDetailsScreen(
                 ) {
                     Text(
                         text = "Delete Recipe",
+                        color =  Color.Red,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -135,7 +136,8 @@ fun RecipeDetailsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     Text(
-                        text = "Are you sure you want to delete this recipe? This action cannot be undone."
+                        text = "Are you sure you want to delete this recipe? This action cannot be undone.",
+                        color = Color.Gray
                     )
                     
                     Spacer(modifier = Modifier.height(24.dp))
@@ -172,7 +174,7 @@ fun RecipeDetailsScreen(
                     // Navigate to logged in user's profile
                     user?.id?.let { userId ->
                         navController.navigate(Screen.UserProfile.createRoute(userId.toString()))
-                    } ?: navController.navigate(Screen.Home.route)
+                    } ?: navController.navigate(Screen.UserProfile.homeRoute)
                 },
                 onSettingsClicked = { navController.navigate(Screen.Settings.route) },
                 onSearchQueryChanged = { query ->

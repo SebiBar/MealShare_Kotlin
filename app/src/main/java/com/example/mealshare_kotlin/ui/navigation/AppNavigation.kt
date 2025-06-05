@@ -13,7 +13,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.mealshare_kotlin.ui.screens.CreateRecipeScreen
-import com.example.mealshare_kotlin.ui.screens.HomeScreen
 import com.example.mealshare_kotlin.ui.screens.LoginScreen
 import com.example.mealshare_kotlin.ui.screens.RecipeDetailsScreen
 import com.example.mealshare_kotlin.ui.screens.RegisterScreen
@@ -27,13 +26,14 @@ import com.example.mealshare_kotlin.viewModel.AuthViewModel
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
-    object Home : Screen("home")
     object Settings : Screen("settings")
     object RecipeDetails : Screen("recipe_details/{recipeId}") {
         fun createRoute(recipeId: String) = "recipe_details/$recipeId"
     }
     object UserProfile : Screen("user_profile/{userId}") {
         fun createRoute(userId: String) = "user_profile/$userId"
+        // Special route for home navigation that will be resolved to current user
+        val homeRoute = "user_profile/me"
     }
     object CreateRecipe : Screen("create_recipe")
 }
@@ -50,6 +50,7 @@ fun AppNavigation(
     onScreenWithNavBarChange: (Boolean) -> Unit = {}
 ) {
     val isAuthenticated by authViewModel.isAuthenticated.collectAsState(initial = false)
+    val currentUser by authViewModel.currentUser.collectAsState(initial = null)
 
     // Track when we're on a screen with NavBar
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -62,14 +63,14 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = if (isAuthenticated) Screen.Home.route else Screen.Login.route,
+        startDestination = if (isAuthenticated) Screen.UserProfile.homeRoute else Screen.Login.route,
         modifier = modifier
     ) {
         // Login screen
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.UserProfile.homeRoute) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -83,7 +84,7 @@ fun AppNavigation(
         composable(Screen.Register.route) {
             RegisterScreen(
                 onRegisterSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.UserProfile.homeRoute) {
                         popUpTo(Screen.Register.route) { inclusive = true }
                     }
                 },
@@ -95,9 +96,13 @@ fun AppNavigation(
             )
         }
 
-        // Home screen
-        composable(Screen.Home.route) {
-            HomeScreen(navController = navController)
+        // Special route for homepage that automatically resolves to current user's profile
+        composable(Screen.UserProfile.homeRoute) {
+            val userId = currentUser?.id?.toString() ?: "0"
+            UserProfileScreen(
+                userId = userId,
+                navController = navController
+            )
         }
 
         //Settings screen
@@ -117,7 +122,9 @@ fun AppNavigation(
                     navController = navController
                 )
             }
-        }        // User profile screen
+        }
+
+        // User profile screen
         composable(
             route = Screen.UserProfile.route,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })

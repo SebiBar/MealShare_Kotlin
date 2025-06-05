@@ -81,9 +81,9 @@ fun CreateRecipeScreen(
                     // Navigate to logged in user's profile
                     user?.id?.let { userId ->
                         navController.navigate(Screen.UserProfile.createRoute(userId.toString())) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
+                            popUpTo(Screen.UserProfile.homeRoute) { inclusive = true }
                         }
-                    } ?: navController.navigate(Screen.Home.route)
+                    } ?: navController.navigate(Screen.UserProfile.homeRoute)
                 },
                 onSettingsClicked = { navController.navigate(Screen.Settings.route) },
                 onSearchQueryChanged = { query ->
