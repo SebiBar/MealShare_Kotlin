@@ -21,9 +21,14 @@ class SearchViewModel @Inject constructor(
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching
 
+    // Control whether to show search results dropdown
+    private val _showSearchResults = MutableStateFlow(false)
+    val showSearchResults: StateFlow<Boolean> = _showSearchResults
+
     fun search(query: String) {
         if (query.isBlank()) {
             _searchResults.value = null
+            _showSearchResults.value = false
             return
         }
 
@@ -33,13 +38,19 @@ class SearchViewModel @Inject constructor(
                 val response = apiService.search(query)
                 if (response.isSuccessful) {
                     _searchResults.value = response.body()
+                    // Show search results dropdown if we have results
+                    _showSearchResults.value = response.body() != null &&
+                            (response.body()?.recipes?.isNotEmpty() == true ||
+                             response.body()?.users?.isNotEmpty() == true)
                 } else {
                     // Handle error
                     _searchResults.value = null
+                    _showSearchResults.value = false
                 }
             } catch (e: Exception) {
                 // Handle exception
                 _searchResults.value = null
+                _showSearchResults.value = false
             } finally {
                 _isSearching.value = false
             }
@@ -48,5 +59,10 @@ class SearchViewModel @Inject constructor(
 
     fun clearSearch() {
         _searchResults.value = null
+        _showSearchResults.value = false
+    }
+
+    fun clearSearchResults() {
+        _showSearchResults.value = false
     }
 }

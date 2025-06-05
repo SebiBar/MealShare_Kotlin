@@ -30,19 +30,36 @@ fun SettingsScreen(
     searchViewModel: SearchViewModel = hiltViewModel()
 ) {
     val user by authViewModel.currentUser.collectAsState(initial = null)
+    val searchResults by searchViewModel.searchResults.collectAsState()
+    val isSearching by searchViewModel.isSearching.collectAsState()
+    val showSearchResults by searchViewModel.showSearchResults.collectAsState(initial = false)
 
     Scaffold(
         topBar = {
             NavBar(
                 username = user?.username ?: "User",
-                onHomeClicked = { navController.navigate(Screen.Home.route) },
+                onHomeClicked = {
+                    // Navigate to logged in user's profile
+                    user?.id?.let { userId ->
+                        navController.navigate(Screen.UserProfile.createRoute(userId.toString()))
+                    } ?: navController.navigate(Screen.Home.route)
+                },
                 onSettingsClicked = { navController.navigate(Screen.Settings.route) },
                 onSearchQueryChanged = { query ->
                     searchViewModel.search(query)
-                    // For settings screen, we'll navigate to Home to show search results
-                    if (query.isNotBlank()) {
-                        navController.navigate(Screen.Home.route)
-                    }
+                },
+                searchResults = searchResults,
+                showSearchResults = showSearchResults,
+                onRecipeClicked = { recipe ->
+                    navController.navigate(Screen.RecipeDetails.createRoute(recipe.id.toString()))
+                    searchViewModel.clearSearchResults()
+                },
+                onUserClicked = { user ->
+                    navController.navigate(Screen.UserProfile.createRoute(user.id.toString()))
+                    searchViewModel.clearSearchResults()
+                },
+                onCloseSearch = {
+                    searchViewModel.clearSearch()
                 }
             )
         }

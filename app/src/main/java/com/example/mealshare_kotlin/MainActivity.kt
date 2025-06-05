@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.mealshare_kotlin.ui.navigation.AppNavigation
@@ -30,11 +34,17 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MealShareApp() {
     val navController = rememberNavController()
+    var hasNavBar by remember { mutableStateOf(false) }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        AppNavigation(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding)
-        )
+    MealShare_KotlinTheme(useNavBarStatusBarColor = hasNavBar) {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            AppNavigation(
+                navController = navController,
+                modifier = Modifier.padding(innerPadding),
+                onScreenWithNavBarChange = { screenHasNavBar ->
+                    hasNavBar = screenHasNavBar
+                }
+            )
+        }
     }
 }
